@@ -145,7 +145,7 @@ void APP_voidUART_ISR(void)
 	}
 	else
 	{
-		DMA2_voidStartTransfer(DMA_STREAM2, UART1_pu32DMAReceiveAddress(), au8AudioBufferGlb, 256);
+		DMA2_voidStartTransfer(DMA_STREAM2, UART1_pu32DMAReceiveAddress(), au8AudioBufferGlb[!u8CurrentBuffer], 256);
 		SYSTICK_voidCtrlIntState(SYSTICK_INT_ENABLE);
 		SYSTICK_enuStart(200);
 	}
@@ -155,6 +155,10 @@ void APP_voidUART_ISR(void)
 
 void APP_voidDMA_ISR(void)
 {
+	if(u8FlagGlb==0)
+	{
+		APP_voidSendImage();
+	}
 	u8FlagGlb=1;
 
 	UART1_voidReceiveIntEnable();
@@ -197,18 +201,21 @@ void APP_voidSendStop(void)
 {
 	SYSTICK_voidDisable();
 	DMA2_voidStartTransfer(DMA_STREAM2, UART1_pu32DMAReceiveAddress(), au16ImageBufferGlb, ARR_LENGTH);
+	u8FlagGlb=0;
 	UART1_voidTransmitSynch('C');
 }
 
 void APP_voidSendNext(void)
 {
 	DMA2_voidStartTransfer(DMA_STREAM2, UART1_pu32DMAReceiveAddress(), au16ImageBufferGlb, ARR_LENGTH);
+	u8FlagGlb=0;
 	UART1_voidTransmitSynch('D');
 }
 
 void APP_voidSendPrev(void)
 {
 	DMA2_voidStartTransfer(DMA_STREAM2, UART1_pu32DMAReceiveAddress(), au16ImageBufferGlb, ARR_LENGTH);
+	u8FlagGlb=0;
 	UART1_voidTransmitSynch('E');
 }
 
